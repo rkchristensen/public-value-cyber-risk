@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Public Value Cyber Risk Studio</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">PV</div>
+      <div>
+        <div class="title">Public Value Cyber Risk Studio</div>
+        <div class="subtitle">Private-by-design: data stays in your browser (local storage)</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button id="btnNew" class="btn primary">New Scenario</button>
+      <button id="btnDuplicate" class="btn">Duplicate</button>
+      <button id="btnDelete" class="btn danger">Delete</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: Scenario list -->
+    <aside class="panel left">
+      <div class="panel-header">
+        <h2>Scenario Library</h2>
+        <input id="search" class="input" placeholder="Search title/tags…" />
+      </div>
+      <div id="scenarioList" class="list"></div>
+
+      <div class="panel-footer">
+        <button id="btnExportJSON" class="btn">Export JSON</button>
+        <label class="btn">
+          Import JSON
+          <input id="fileImport" type="file" accept="application/json" hidden />
+        </label>
+        <button id="btnExportMD" class="btn">Export Markdown</button>
+      </div>
+
+      <div class="note">
+        <strong>Privacy:</strong> this app does not send or store your data on a server.
+      </div>
+    </aside>
+
+    <!-- RIGHT: Tabs + editor -->
+    <section class="panel right">
+      <div class="tabs">
+        <button class="tab active" data-tab="builder">Builder</button>
+        <button class="tab" data-tab="values">Public Values</button>
+        <button class="tab" data-tab="costs">Costs</button>
+        <button class="tab" data-tab="dashboard">Dashboard</button>
+      </div>
+
+      <!-- BUILDER -->
+      <div class="tabpane active" id="tab-builder">
+        <h2>Scenario Builder</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Metadata</h3>
+            <label class="field">
+              <span>Title</span>
+              <input id="metaTitle" class="input" />
+            </label>
+            <label class="field">
+              <span>Tags (comma separated)</span>
+              <input id="metaTags" class="input" placeholder="health, municipal, ransomware" />
+            </label>
+            <label class="field">
+              <span>Notes</span>
+              <textarea id="metaNotes" class="input" rows="4"></textarea>
+            </label>
+          </div>
+
+          <div class="card">
+            <h3>Threat Scenario</h3>
+            <label class="field">
+              <span>Threat type</span>
+              <select id="threatType" class="input">
+                <option value="ransomware">Ransomware</option>
+                <option value="data_breach">Data breach</option>
+                <option value="ddos">Denial-of-service</option>
+                <option value="supply_chain">Supply-chain compromise</option>
+                <option value="data_manipulation">Data manipulation</option>
+                <option value="insider">Insider</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Actor sophistication</span>
+              <select id="actorSoph" class="input">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Intent</span>
+              <div class="checks">
+                <label><input type="checkbox" class="intent" value="disruption" /> Disruption</label>
+                <label><input type="checkbox" class="intent" value="extortion" /> Extortion</label>
+                <label><input type="checkbox" class="intent" value="extraction" /> Extraction</label>
+                <label><input type="checkbox" class="intent" value="manipulation" /> Manipulation</label>
+              </div>
+            </label>
+            <label class="field">
+              <span>Likelihood</span>
+              <select id="likelihood" class="input">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Time horizon</span>
+              <select id="timeHorizon" class="input">
+                <option value="short">Short (days–weeks)</option>
+                <option value="medium">Medium (weeks–months)</option>
+                <option value="long">Long (months+)</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Service Ecosystem</h3>
+            <label class="field">
+              <span>Primary service</span>
+              <input id="primaryService" class="input" placeholder="Healthcare Delivery" />
+            </label>
+            <label class="field">
+              <span>Dependent services (one per line)</span>
+              <textarea id="dependentServices" class="input" rows="4" placeholder="Emergency Response&#10;Public Health Reporting"></textarea>
+            </label>
+            <label class="field">
+              <span>Organizations involved (one per line)</span>
+              <textarea id="orgsInvolved" class="input" rows="4" placeholder="Public Hospital&#10;Health Department&#10;Vendor A"></textarea>
+            </label>
+            <div class="grid2">
+              <label class="field">
+                <span>Dependency depth</span>
+                <select id="dependencyDepth" class="input">
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Geographic scope</span>
+                <select id="geoScope" class="input">
+                  <option value="local">Local</option>
+                  <option value="regional">Regional</option>
+                  <option value="national">National</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Service Disruption</h3>
+            <label class="field">
+              <span>Severity</span>
+              <select id="disruptionSeverity" class="input">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Duration (hours)</span>
+              <input id="durationHours" class="input" type="number" min="0" />
+            </label>
+            <label class="field">
+              <span>Degraded mode available?</span>
+              <select id="degradedMode" class="input">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Cascade notes</span>
+              <textarea id="cascadeNotes" class="input" rows="4" placeholder="Describe how disruption spills into other services..."></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="savebar">
+          <span id="saveStatus" class="muted">Saved locally.</span>
+          <button id="btnSave" class="btn primary">Save</button>
+        </div>
+      </div>
+
+      <!-- VALUES -->
+      <div class="tabpane" id="tab-values">
+        <h2>Public Value Impacts</h2>
+
+        <div class="hint">
+          Score each dimension from <strong>0</strong> (none) to <strong>5</strong> (severe).
+        </div>
+
+        <div class="grid3">
+          <div class="card">
+            <h3>Individual Level</h3>
+            <div id="valuesIndividual" class="sliders"></div>
+          </div>
+          <div class="card">
+            <h3>Organizational Level</h3>
+            <div id="valuesOrg" class="sliders"></div>
+          </div>
+          <div class="card">
+            <h3>Societal Level</h3>
+            <div id="valuesSoc" class="sliders"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Equity Amplification</h3>
+          <div class="grid2">
+            <label class="field">
+              <span>Equity weight</span>
+              <input id="equityWeight" class="input" type="number" step="0.1" min="1" value="1.0" />
+              <div class="muted small">1.0 = no amplification; 1.2–1.8 typical for disproportionate impact</div>
+            </label>
+            <label class="field">
+              <span>Affected populations (notes)</span>
+              <textarea id="equityNotes" class="input" rows="3" placeholder="Elderly, low-income households, rural populations…"></textarea>
+            </label>
+          </div>
+        </div>
+
+        <div class="savebar">
+          <span class="muted">Saved locally.</span>
+          <button id="btnSaveValues" class="btn primary">Save</button>
+        </div>
+      </div>
+
+      <!-- COSTS -->
+      <div class="tabpane" id="tab-costs">
+        <h2>Cost Model</h2>
+        <div class="grid2">
+          <div class="card">
+            <h3>Inputs</h3>
+
+            <label class="field">
+              <span>Population affected</span>
+              <input id="popAffected" class="input" type="number" min="0" />
+            </label>
+
+            <label class="field">
+              <span>Avg time burden (hours per person)</span>
+              <input id="timeBurden" class="input" type="number" min="0" step="0.1" />
+            </label>
+
+            <label class="field">
+              <span>Value of time ($/hour)</span>
+              <input id="valueOfTime" class="input" type="number" min="0" step="1" />
+            </label>
+
+            <label class="field">
+              <span>Organizational cost multiplier</span>
+              <input id="orgMultiplier" class="input" type="number" min="0" step="0.1" />
+              <div class="muted small">Multiplies individual time-cost into an org cost proxy</div>
+            </label>
+
+            <label class="field">
+              <span>Societal cost multiplier</span>
+              <input id="socMultiplier" class="input" type="number" min="0" step="0.1" />
+              <div class="muted small">Proxy for trust/legitimacy and systemic impacts</div>
+            </label>
+
+            <label class="field">
+              <span>Uncertainty band</span>
+              <select id="uncertainty" class="input">
+                <option value="low">Low (±15%)</option>
+                <option value="medium">Medium (±35%)</option>
+                <option value="high">High (±60%)</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Assumptions (one per line)</span>
+              <textarea id="assumptions" class="input" rows="4" placeholder="Scenario-based estimate&#10;No telemetry data"></textarea>
+            </label>
+
+            <div class="savebar">
+              <span class="muted">Saved locally.</span>
+              <button id="btnSaveCosts" class="btn primary">Save</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Outputs</h3>
+            <div class="kpis">
+              <div class="kpi">
+                <div class="kpi-label">Individual cost range</div>
+                <div id="kpiInd" class="kpi-value">$0 – $0</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Organizational cost range</div>
+                <div id="kpiOrg" class="kpi-value">$0 – $0</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Societal cost range</div>
+                <div id="kpiSoc" class="kpi-value">$0 – $0</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Total ecosystem cost range</div>
+                <div id="kpiTotal" class="kpi-value">$0 – $0</div>
+              </div>
+            </div>
+
+            <div class="hr"></div>
+
+            <h3>Transparency</h3>
+            <div id="costExplain" class="muted small"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="tabpane" id="tab-dashboard">
+        <h2>Dashboard</h2>
+
+        <div class="grid2">
+          <div class="card">
+            <h3>Risk Snapshot</h3>
+            <div class="kpis">
+              <div class="kpi">
+                <div class="kpi-label">Likelihood</div>
+                <div id="dashLikelihood" class="kpi-value">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Disruption severity</div>
+                <div id="dashSeverity" class="kpi-value">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Equity weight</div>
+                <div id="dashEquity" class="kpi-value">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Total cost range</div>
+                <div id="dashCost" class="kpi-value">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Public Value Profile</h3>
+            <div class="muted small">Averages by level (0–5)</div>
+            <div class="kpis">
+              <div class="kpi">
+                <div class="kpi-label">Individual avg</div>
+                <div id="avgInd" class="kpi-value">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Organizational avg</div>
+                <div id="avgOrg" class="kpi-value">—</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-label">Societal avg</div>
+                <div id="avgSoc" class="kpi-value">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Ecosystem Summary</h3>
+          <div id="ecosystemSummary" class="summary"></div>
+        </div>
+
+        <div class="card">
+          <h3>Cascading Effects (Narrative)</h3>
+          <div id="cascadeSummary" class="summary"></div>
+        </div>
+
+        <div class="card">
+          <h3>Governance Implications (Editable notes)</h3>
+          <textarea id="govNotes" class="input" rows="5" placeholder="Coordination required… accountability issues… recommended actions…"></textarea>
+          <div class="savebar">
+            <span class="muted">Saved locally.</span>
+            <button id="btnSaveGov" class="btn primary">Save</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span class="muted small">
+      Tip: For “private access”, host on Cloudflare Pages and gate with Cloudflare Access (email allowlist).
+    </span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
